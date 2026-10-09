@@ -1,5 +1,5 @@
 public class ResponseSearchParamsDTO 
 {
-    public List<CandidatesEntity> Candidates { get; set; }
+    public List<ResponseCandidateDTO> Candidates { get; set; }
     public int ErrorCount {get; set;}
 }

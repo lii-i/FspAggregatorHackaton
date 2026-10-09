@@ -39,14 +39,14 @@ public static class EndPoints{
             return Results.Ok(result.Candidates);
         });
 
-        app.MapPost("/api/candidates", async (
-            [FromBody] RequestAddCandiate candiate,
-            [FromServices] CandidateService service)  => {
+        // app.MapPost("/api/candidates", async (
+        //     [FromBody] RequestAddCandiate candiate,
+        //     [FromServices] CandidateService service)  => {
             
-            await service.AddCandiateAsync(candiate);
-            return Results.Ok();
+        //     await service.AddCandiateAsync(candiate);
+        //     return Results.Ok(new {success = true, message = "Кандидат успешно добавлен"});
 
-        });
+        // });
 
     }
 }

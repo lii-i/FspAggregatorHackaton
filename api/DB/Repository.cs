@@ -8,7 +8,7 @@ public class Repository {
         _db = db;
     }
 
-    public async Task<ResponseSearchParamsDTO> GetCandidateForParamsAsync(RequestSearchParamsDTO searchParams){
+    public async Task<List<CandidatesEntity>> GetCandidateForParamsAsync(RequestSearchParamsDTO searchParams){
         IQueryable<CandidatesEntity> query = _db.Candidates;
     
        if (!string.IsNullOrWhiteSpace(searchParams.SearchQuery))
@@ -23,9 +23,9 @@ public class Repository {
             foreach (var word in searchWords)
             {
                 query = query.Where(c => 
-                    c.FullName.ToLower().Contains(word) ||
-                    c.Handle.ToLower().Contains(word) ||
-                    c.PrimaryStack.Any(stackItem => stackItem.ToLower().Contains(word))
+                    (c.FullName != null && c.FullName.ToLower().Contains(word)) ||
+                    (c.Handle != null && c.Handle.ToLower().Contains(word)) ||
+                    (c.PrimaryStack != null && c.PrimaryStack.Any(stackItem => stackItem.ToLower().Contains(word)))
                 );
             }
         }
@@ -37,8 +37,7 @@ public class Repository {
             .Where(c => !string.IsNullOrEmpty(c))
             .ToList();
 
-            //делаем выборку ИЛИ
-            query = query.Where(c => c.CategorySpecialization.Any(сat => categories.Contains(сat.ToLower())));
+            query = query.Where(c => c.CategorySpecialization != null && categories.Contains(c.CategorySpecialization.ToLower()));
         }
         
         if(!string.IsNullOrEmpty(searchParams.Stack)){
@@ -50,7 +49,7 @@ public class Repository {
 
             //делаем выборку И
             foreach(var stackItem in Stack){
-                query = query.Where(c => c.PrimaryStack.Any(s => s.ToLower().Contains(stackItem)));
+                query = query.Where(c => (c.PrimaryStack != null && c.PrimaryStack.Any(s => s.ToLower().Contains(stackItem))));
             }
         }
 
@@ -63,7 +62,7 @@ public class Repository {
 
             //делаем выборку И
             foreach(var discipline in disciplines){
-                query = query.Where(c => c.FspAchivements.Any(a => a.Discipline.ToLower().Contains(discipline)));
+                query = query.Where(c => (c.FspAchivements != null && c.FspAchivements.Any(a => a.Discipline.ToLower().Contains(discipline))));
             }
         }
 
@@ -75,7 +74,7 @@ public class Repository {
             .ToList();
 
             // Логика ИЛИ 
-            query = query.Where(c => ranks.Contains(c.FspSportRang.ToLower()));
+            query = query.Where(c => c.FspSportRang != null && ranks.Contains(c.FspSportRang.ToLower()));
         }
 
         if(!string.IsNullOrEmpty(searchParams.Grade)){
@@ -85,11 +84,11 @@ public class Repository {
             .Where(g => !string.IsNullOrEmpty(g))
             .ToList();
             
-            query = query.Where(c => grades.Any(g => g.Contains(c.Grade.ToLower())));
+            query = query.Where(c => c.Grade!=null && grades.Any(g => g.Contains(c.Grade.ToLower())));
         }
 
         if(searchParams.MaxSalary != null){
-            query = query.Where(c => c.SalaryMin <= searchParams.MaxSalary);
+            query = query.Where(c => c.SalaryMin != null && c.SalaryMin <= searchParams.MaxSalary);
         }
 
         if(searchParams.HasFsp != null && searchParams.HasFsp == true){
@@ -117,41 +116,42 @@ public class Repository {
         int page = searchParams.Page ?? 1;
         int pageSize = searchParams.PageSize ?? 20;
 
-        return new ResponseSearchParamsDTO { 
-            Candidates = await query
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .ToListAsync(),
-            ErrorCount = 0
-        };
+        List<CandidatesEntity> responseList = await query
+            .Include(c => c.RadarSkills)
+            .Include(c => c.FspAchivements)
+            .Include(c => c.JobOffers)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+        return responseList;
     }
 
-    public async Task AddCandiateAsync(RequestAddCandiate candiate){
-        CandidatesEntity candidate = new CandidatesEntity();
-        candidate.FullName = candiate.FullName;
-        candidate.AvaaterURL = candiate.AvaaterURL;
-        candidate.Handle = candiate.Handle;
-        candidate.City = candiate.City;
-        candidate.Grade = candiate.Grade;
-        candidate.CategorySpecialization = candiate.CategorySpecialization;
-        candidate.SalaryMax = candiate.SalaryMax;
-        candidate.SalaryMin = candiate.SalaryMin;
-        candidate.PrimaryStack = candiate.PrimaryStack;
-        candidate.Bio = candiate.Bio;
-        candidate.IsOpenToOffers = candiate.IsOpenToOffers;
-        candidate.TestIsPassed = candiate.TestIsPassed;
-        candidate.TestedGrade = candiate.TestedGrade;
-        candidate.TestPassedAt = candiate.TestPassedAt;
-        candidate.TestCoolDownUntil = candiate.TestCoolDownUntil;
-        candidate.Telegram = candiate.Telegram;
-        candidate.Email = candiate.Email;
-        candidate.Phone = candiate.Phone;
-        candidate.FspId = candiate.FspId;
-        candidate.FspSportRang = candiate.FspSportRang;
-        candidate.FspRatingScore = candiate.FspRatingScore;
+    // public async Task AddCandiateAsync(RequestAddCandiate candiate){
+    //     CandidatesEntity candidate = new CandidatesEntity();
+    //     candidate.FullName = candiate.FullName;
+    //     candidate.AvaaterURL = candiate.AvaaterURL;
+    //     candidate.Handle = candiate.Handle;
+    //     candidate.City = candiate.City;
+    //     candidate.Grade = candiate.Grade;
+    //     candidate.CategorySpecialization = candiate.CategorySpecialization;
+    //     candidate.SalaryMax = candiate.SalaryMax;
+    //     candidate.SalaryMin = candiate.SalaryMin;
+    //     candidate.PrimaryStack = candiate.PrimaryStack;
+    //     candidate.Bio = candiate.Bio;
+    //     candidate.IsOpenToOffers = candiate.IsOpenToOffers;
+    //     candidate.TestIsPassed = candiate.TestIsPassed;
+    //     candidate.TestedGrade = candiate.TestedGrade;
+    //     candidate.TestPassedAt = candiate.TestPassedAt;
+    //     candidate.TestCoolDownUntil = candiate.TestCoolDownUntil;
+    //     candidate.Telegram = candiate.Telegram;
+    //     candidate.Email = candiate.Email;
+    //     candidate.Phone = candiate.Phone;
+    //     candidate.FspId = candiate.FspId;
+    //     candidate.FspSportRang = candiate.FspSportRang;
+    //     candidate.FspRatingScore = candiate.FspRatingScore;
         
-        _db.Candidates.Add(candidate);
-        await _db.SaveChangesAsync();
-    }
+    //     _db.Candidates.Add(candidate);
+    //     await _db.SaveChangesAsync();
+    // }
 
 }

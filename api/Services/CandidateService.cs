@@ -16,11 +16,14 @@ public class CandidateService{
         }
     }
 
-    // public async Task AddCandiateAsync(RequestAddCandiate candiate){
-    //     await _rep.AddCandiateAsync(candiate);
-
-    //     return;
-    // }
+    public async Task<bool> AddCandiateAsync(RequestAddCandiateDTO candiate){
+        try{
+            await _rep.AddCandiateAsync(candiate);
+            return true;
+        } catch{
+            return false;
+        }
+    }
 
 
     private ResponseSearchParamsDTO MapToResponseCandidate(List<CandidatesEntity> dbCandidates)
@@ -35,8 +38,8 @@ public class CandidateService{
         City = c.City,
         Grade = c.Grade,
         
-        Category = c.CategorySpecialization != null ? new CategoryDTO {
-            Specialization = c.CategorySpecialization,
+        Category = c.CategorySpecialization != null && c.CategorySpecialization.Length > 0 ? new CategoryDTO {
+            Specialization = c.CategorySpecialization.FirstOrDefault() ?? "",
             Grade = c.Grade ?? "Empty"
         } : null,
 

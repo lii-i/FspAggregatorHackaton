@@ -51,7 +51,7 @@ export const CandidateCard: React.FC<CandidateCardProps> = ({ candidate }) => {
 
             <div>
               <span className="text-[10px] font-mono text-chalk-dim block uppercase tracking-widest font-semibold">
-                ID: {candidate.id.toUpperCase()}
+                ID: {String(candidate.id).toUpperCase()}
               </span>
               <h3 className="text-base font-extrabold text-chalk group-hover:text-crimson transition-colors leading-tight font-sans">
                 {candidate.fullName}

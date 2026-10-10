@@ -120,28 +120,17 @@ export const useAppStore = create<AppState>((set, get) => ({
     try {
       const filters = get().filters;
       const data = await api.getCandidates({
-        // Передаем параметры согласно C# DTO: Page, PageSize, SearchQuery, Category, Stack, Discipline, SportRank, Grade, MaxSalary, HasFsp, SortBy
-        Page: filters.page || 1,
+        // Передаем параметры в camelCase
         page: filters.page || 1,
-        PageSize: filters.pageSize || 20,
         pageSize: filters.pageSize || 20,
-        SearchQuery: filters.searchQuery || undefined,
         searchQuery: filters.searchQuery || undefined,
-        Category: filters.categories.length > 0 ? filters.categories : undefined,
         category: filters.categories.length > 0 ? filters.categories : undefined,
-        Stack: filters.stack.length > 0 ? filters.stack : undefined,
         stack: filters.stack.length > 0 ? filters.stack : undefined,
-        Discipline: filters.disciplines.length > 0 ? filters.disciplines : undefined,
         discipline: filters.disciplines.length > 0 ? filters.disciplines : undefined,
-        SportRank: filters.sportRanks.length > 0 ? filters.sportRanks : undefined,
         sportRank: filters.sportRanks.length > 0 ? filters.sportRanks : undefined,
-        Grade: filters.grades.length > 0 ? filters.grades : undefined,
         grade: filters.grades.length > 0 ? filters.grades : undefined,
-        MaxSalary: filters.maxSalary < 600000 ? filters.maxSalary : undefined,
         maxSalary: filters.maxSalary < 600000 ? filters.maxSalary : undefined,
-        HasFsp: filters.onlyVerifiedFsp ? true : undefined,
         hasFsp: filters.onlyVerifiedFsp ? true : undefined,
-        SortBy: filters.sortBy,
         sortBy: filters.sortBy
       });
       set({ candidates: data, isLoadingCandidates: false });
@@ -187,9 +176,9 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   addCandidate: async (candidateData) => {
     try {
-      const newCand = await api.addCandidate(candidateData);
-      set((state) => ({ candidates: [newCand, ...state.candidates] }));
-      return newCand;
+      await api.addCandidate(candidateData);
+      await get().fetchCandidates(); // Заново стягиваем список с бэкенда
+      return get().candidates[0] || null;
     } catch (err) {
       console.warn('API addCandidate недоступен:', err);
       return null;

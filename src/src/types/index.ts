@@ -20,6 +20,7 @@ export type DeveloperGrade = 'Junior+' | 'Middle' | 'Middle+' | 'Senior' | 'Lead
 
 // Официальная Категория платформы: [Специализация] + [Грейд] (по ТЗ стр. 2)
 export interface CandidateCategory {
+  id?: string;
   specialization: string;        // "Бэкенд-разработка (C++ / Go)"
   grade: DeveloperGrade;
 }

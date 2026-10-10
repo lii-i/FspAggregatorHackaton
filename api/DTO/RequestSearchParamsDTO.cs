@@ -2,7 +2,6 @@ public class RequestSearchParamsDTO
 {
     public int? Page { get; set; }
     public int? PageSize { get; set; }
-    public string? SearchQuery { get; set; }
     public string? Category { get; set; }
     public string? Stack { get; set; }
     public string? Discipline { get; set; }

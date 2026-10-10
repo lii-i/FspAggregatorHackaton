@@ -17,7 +17,7 @@ import { useAppStore } from '../store/useAppStore';
 import type { DeveloperGrade, RequestAddCandidate } from '../types';
 
 export const CreateCandidateModal: React.FC = () => {
-  const { isCreateCandidateOpen, closeCreateCandidateModal, addCandidate } = useAppStore();
+  const { isCreateCandidateOpen, closeCreateCandidateModal, addCandidate, setRoleMode } = useAppStore();
 
   const [fullName, setFullName] = useState('');
   const [handle, setHandle] = useState('');
@@ -119,11 +119,6 @@ export const CreateCandidateModal: React.FC = () => {
       origin: { y: 0.6 },
       colors: ['#00F0FF', '#F43F5E', '#FFB800']
     });
-
-    setTimeout(() => {
-      setIsSuccess(false);
-      closeCreateCandidateModal();
-    }, 1500);
   };
 
   return (
@@ -147,9 +142,19 @@ export const CreateCandidateModal: React.FC = () => {
             <h3 className="text-2xl font-black text-white tracking-wide uppercase">
               РЕЗЮМЕ УСПЕШНО РАЗМЕЩЕНО В РЕЕСТРЕ!
             </h3>
-            <p className="text-sm text-slate-300 max-w-md mx-auto leading-relaxed">
+            <p className="text-sm text-slate-300 max-w-md mx-auto leading-relaxed pb-4">
               Запрос <code className="text-neon-cyan font-bold">POST /api/candidates</code> успешно отправлен на бэкенд. Профиль опубликован в каталоге соискателей.
             </p>
+            <button 
+              onClick={() => {
+                setIsSuccess(false);
+                closeCreateCandidateModal();
+                setRoleMode('recruiter'); // Перекидываем на главную
+              }}
+              className="px-8 py-3 rounded-xl bg-gradient-to-r from-neon-cyan to-fsp-emerald text-black font-extrabold text-sm uppercase tracking-wider hover:opacity-90 transition-opacity shadow-glow-cyan"
+            >
+              ОК
+            </button>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-6">

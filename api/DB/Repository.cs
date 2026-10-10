@@ -10,25 +10,6 @@ public class Repository {
 
     public async Task<List<CandidatesEntity>> GetCandidateForParamsAsync(RequestSearchParamsDTO searchParams){
         IQueryable<CandidatesEntity> query = _db.Candidates;
-    
-       if (!string.IsNullOrWhiteSpace(searchParams.SearchQuery))
-        {
-            var searchWords = searchParams.SearchQuery
-                .Split(',')
-                .Select(w => w.Trim().ToLower())
-                .Where(w => !string.IsNullOrEmpty(w))
-                .ToList();
-
-            //выборка И
-            foreach (var word in searchWords)
-            {
-                query = query.Where(c => 
-                    (c.FullName != null && c.FullName.ToLower().Contains(word)) ||
-                    (c.Handle != null && c.Handle.ToLower().Contains(word)) ||
-                    (c.PrimaryStack != null && c.PrimaryStack.Any(stackItem => stackItem.ToLower().Contains(word)))
-                );
-            }
-        }
 
         if(!string.IsNullOrEmpty(searchParams.Category)){
             var categories = searchParams.Category
@@ -37,7 +18,8 @@ public class Repository {
             .Where(c => !string.IsNullOrEmpty(c))
             .ToList();
 
-            query = query.Where(c => c.CategorySpecialization != null && categories.Contains(c.CategorySpecialization.ToLower()));
+            // Работаем только с первой категорей, потом при развитии сделаем уже несколько и + добавим отдельую сущность для тестов. А пока проверяем на CategorySpecialization[0]
+            query = query.Where(c => c.CategorySpecialization != null && c.CategorySpecialization.Length > 0 && categories.Any(cat => c.CategorySpecialization[0].ToLower().Contains(cat)));
         }
         
         if(!string.IsNullOrEmpty(searchParams.Stack)){
@@ -126,32 +108,32 @@ public class Repository {
         return responseList;
     }
 
-    // public async Task AddCandiateAsync(RequestAddCandiate candiate){
-    //     CandidatesEntity candidate = new CandidatesEntity();
-    //     candidate.FullName = candiate.FullName;
-    //     candidate.AvaaterURL = candiate.AvaaterURL;
-    //     candidate.Handle = candiate.Handle;
-    //     candidate.City = candiate.City;
-    //     candidate.Grade = candiate.Grade;
-    //     candidate.CategorySpecialization = candiate.CategorySpecialization;
-    //     candidate.SalaryMax = candiate.SalaryMax;
-    //     candidate.SalaryMin = candiate.SalaryMin;
-    //     candidate.PrimaryStack = candiate.PrimaryStack;
-    //     candidate.Bio = candiate.Bio;
-    //     candidate.IsOpenToOffers = candiate.IsOpenToOffers;
-    //     candidate.TestIsPassed = candiate.TestIsPassed;
-    //     candidate.TestedGrade = candiate.TestedGrade;
-    //     candidate.TestPassedAt = candiate.TestPassedAt;
-    //     candidate.TestCoolDownUntil = candiate.TestCoolDownUntil;
-    //     candidate.Telegram = candiate.Telegram;
-    //     candidate.Email = candiate.Email;
-    //     candidate.Phone = candiate.Phone;
-    //     candidate.FspId = candiate.FspId;
-    //     candidate.FspSportRang = candiate.FspSportRang;
-    //     candidate.FspRatingScore = candiate.FspRatingScore;
+    public async Task AddCandiateAsync(RequestAddCandiateDTO candiate){
+        CandidatesEntity candidate = new CandidatesEntity();
+        candidate.FullName = candiate.FullName;
+        candidate.AvatarURL = "https://ui-avatars.com/api/?name=" + candiate.FullName;
+        candidate.Handle = candiate.Handle;
+        candidate.City = candiate.City;
+        candidate.Grade = candiate.Grade;
+        candidate.CategorySpecialization = candiate.CategorySpecialization; 
+        candidate.SalaryMax = candiate.SalaryMax;
+        candidate.SalaryMin = candiate.SalaryMin;
+        candidate.PrimaryStack = candiate.PrimaryStack;
+        candidate.Bio = candiate.Bio;
+        candidate.IsOpenToOffers = candiate.IsOpenToOffers;
+        candidate.TestIsPassed = candiate.TestIsPassed;
+        candidate.TestedGrade = candiate.TestedGrade;
+        candidate.TestPassedAt = candiate.TestPassedAt;
+        candidate.TestCoolDownUntil = candiate.TestCoolDownUntil;
+        candidate.Telegram = candiate.Telegram;
+        candidate.Email = candiate.Email;
+        candidate.Phone = candiate.Phone;
+        candidate.FspId = candiate.FspId;
+        candidate.FspSportRang = candiate.FspSportRang;
+        candidate.FspRatingScore = candiate.FspRatingScore;
         
-    //     _db.Candidates.Add(candidate);
-    //     await _db.SaveChangesAsync();
-    // }
+        _db.Candidates.Add(candidate);
+        await _db.SaveChangesAsync();
+    }
 
 }

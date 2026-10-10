@@ -20,7 +20,6 @@ public static class EndPoints{
             RequestSearchParamsDTO searchParams = new RequestSearchParamsDTO{
                 Page = page,
                 PageSize = pageSize,
-                SearchQuery = searchQuery,
                 Category = category,
                 Stack = stack,
                 Discipline = discipline,
@@ -39,14 +38,21 @@ public static class EndPoints{
             return Results.Ok(result.Candidates);
         });
 
-        // app.MapPost("/api/candidates", async (
-        //     [FromBody] RequestAddCandiate candiate,
-        //     [FromServices] CandidateService service)  => {
+        app.MapPost("/api/candidates", async (
+            [FromBody] RequestAddCandiateDTO candiate,
+            [FromServices] CandidateService service)  => {
             
-        //     await service.AddCandiateAsync(candiate);
-        //     return Results.Ok(new {success = true, message = "Кандидат успешно добавлен"});
+            bool isAdded = await service.AddCandiateAsync(candiate);
+            if(!isAdded){
+                return Results.Problem("Ошибка базы данных", statusCode: 500);
+            }
+            return Results.Ok(new {success = true, message = "Кандидат успешно добавлен"});
 
-        // });
+        });
+
+        app.MapGet("/api/smartSearch", async () => {
+            
+        });
 
     }
 }

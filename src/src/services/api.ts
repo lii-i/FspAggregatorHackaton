@@ -28,7 +28,11 @@ export const api = {
     const query = searchParams.toString();
     const res = await fetch(`${API_BASE_URL}/candidates${query ? `?${query}` : ''}`);
     if (!res.ok) throw new Error('Не удалось получить список кандидатов');
-    return res.json();
+    const rawData = await res.json();
+    return rawData.map((c: any) => ({
+      ...c,
+      id: String(c.id) // У C# id это int, переводим в строку для фронтенда
+    }));
   },
 
   // 2. Создание кандидата / регистрация соискателя (POST /api/candidates)

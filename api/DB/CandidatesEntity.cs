@@ -6,7 +6,7 @@ public class CandidatesEntity {
     public string? Headline {get; set;}
     public string? City {get; set;}
     public string? Grade {get; set;}
-    public string? CategorySpecialization {get; set;}
+    public string[]? CategorySpecialization {get; set;}
     public int? SalaryMax {get; set;}
     public int? SalaryMin {get; set;}
     public string[]? PrimaryStack {get; set;}
